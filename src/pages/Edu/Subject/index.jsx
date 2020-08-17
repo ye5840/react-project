@@ -1,9 +1,11 @@
 import React, { Component } from "react";
 import {Button,Table,Tooltip } from 'antd'
 import {PlusOutlined,FormOutlined,DeleteOutlined } from '@ant-design/icons'
+import {connect} from 'react-redux'
 import './index.less'
+import {getSubjectList,getSecSubjectList} from './redux'
 const columns = [
-  { title: '分类名称', dataIndex: 'name', key: 'name' },
+  { title: '分类名称', dataIndex: 'title', key: 'name' },
   {
     title: '操作',
     // dataIndex: '',
@@ -51,8 +53,31 @@ const data = [
     description: 'My name is Joe Black, I am 32 years old, living in Sidney No. 1 Lake Park.',
   },
 ];
-export default class Subject extends Component {
+
+@connect(
+  state => ({subjectList:state.subjectList}),
+  {getSubjectList,getSecSubjectList}
+)
+class Subject extends Component {
+  page = 1
+  componentDidMount() {
+    this.props.getSubjectList(1,10)
+  }
+  handleChange = (page,pageSize) => {
+    this.page = page
+    this.props.getSubjectList(page,pageSize)
+  }
+  handleShowSizeChange = (page,pageSize) => {
+    this.props.getSubjectList(page,pageSize)
+  }
+  handleExpand = (expanded,record) => {
+    // console.log(expanded,record)
+    if(expanded){
+      this.props.getSecSubjectList(record._id)
+    }
+  }
   render() {
+    console.log(this.props)
     return (
     <div className='subject'>
       <Button type="primary" icon={<PlusOutlined />} className='subject-btn'>
@@ -61,12 +86,28 @@ export default class Subject extends Component {
       <Table
         columns={columns}
         expandable={{
-          expandedRowRender: record => <p style={{ margin: 0 }}>{record.description}</p>,
-          rowExpandable: record => record.name !== 'Not Expandable',
+          // expandedRowRender: record => <p style={{ margin: 0 }}>{record.description}</p>,
+          // rowExpandable: record => record.name !== 'Not Expandable',
+          onExpand : this.handleExpand
         }}
-        dataSource={data}
+        dataSource={this.props.subjectList.items}
+        rowKey='_id'
+        pagination={{
+          total:this.props.subjectList.total,
+          showSizeChanger:true,
+          pageSizeOptions:['5','10','15'],
+          showQuickJumper:true,
+          defaultPageSize:10,
+          // onChange:(page,pageSize) => {
+          //   console.log(page,pageSize)
+          // }
+          onChange:this.handleChange,
+          onShowSizeChange:this.handleShowSizeChange,
+          current:this.page
+        }}
       />,
     </div>
     )
   }
 }
+export default Subject
