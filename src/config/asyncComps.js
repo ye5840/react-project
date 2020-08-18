@@ -23,6 +23,7 @@ const Subject = () => lazy(() => import("@pages/Edu/Subject"));
 const Settings = () => lazy(() => import("@pages/User/Settings"));
 const Center = () => lazy(() => import("@pages/User/Center"));
 const Test = () => lazy(() => import("@pages/Edu/Test"));
+const AddSubject = () => lazy(() => import("@pages/Edu/Subject/AddSubject"));
 
 export default {
   Admin,
@@ -40,5 +41,6 @@ export default {
   Settings,
   Center,
   Test,
-  Subject
+  Subject,
+  AddSubject
 };
