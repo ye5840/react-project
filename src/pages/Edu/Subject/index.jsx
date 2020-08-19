@@ -1,46 +1,14 @@
 import React, { Component } from 'react'
-import { Button, Table, Tooltip,Input, message} from 'antd'
+import { Button, Table, Tooltip,Input, message,Modal} from 'antd'
 import { PlusOutlined, FormOutlined, DeleteOutlined } from '@ant-design/icons'
 import {connect} from 'react-redux'
-import {getSubjectList,getSecSubjectList,updateSubjectList} from './redux'
+import {getSubjectList,getSecSubjectList,updateSubjectList,delSubjectList} from './redux'
 import {reqUpdateSubject} from '@api/edu/subject'
 import './index.less'
-const data = [
-  {
-    key: 1,
-    name: 'John Brown',
-    age: 32,
-    address: 'New York No. 1 Lake Park',
-    description:
-      'My name is John Brown, I am 32 years old, living in New York No. 1 Lake Park.'
-  },
-  {
-    key: 2,
-    name: 'Jim Green',
-    age: 42,
-    address: 'London No. 1 Lake Park',
-    description:
-      'My name is Jim Green, I am 42 years old, living in London No. 1 Lake Park.'
-  },
-  {
-    key: 3,
-    name: 'Not Expandable',
-    age: 29,
-    address: 'Jiangsu No. 1 Lake Park',
-    description: 'This not expandable'
-  },
-  {
-    key: 4,
-    name: 'Joe Black',
-    age: 32,
-    address: 'Sidney No. 1 Lake Park',
-    description:
-      'My name is Joe Black, I am 32 years old, living in Sidney No. 1 Lake Park.'
-  }
-]
+
 @connect(
   state => ({subjectList:state.subjectList}),
-  {getSubjectList,getSecSubjectList,updateSubjectList}
+  {getSubjectList,getSecSubjectList,updateSubjectList,delSubjectList}
 )
 class Subject extends Component {
   state = {
@@ -106,6 +74,31 @@ class Subject extends Component {
     })
     // this.props.getSubjectList(1,10)
   }
+  handleDel = record =>  () =>{
+    // record._id
+    Modal.confirm({
+      title:(
+      <div>
+        你确定要删除
+        <span style={{color:'red',margin:'0 10px'}}>{record.title}</span>
+        课程分类吗？
+      </div>
+      ),
+      onOk:async () => {
+        await this.props.delSubjectList(record._id)
+        message.success('数据删除成功')
+        if(record.parentId === '0'){
+          if( this.page > 1 && 
+            this.props.subjectList.items.length <= 0 && 
+            record.parentId === '0'){
+              this.props.getSubjectList(--this.page,10)
+              return
+          }
+          this.props.getSubjectList(this.page,10)
+        }
+      }
+    })
+  }
   render() {
     const columns = [
       /**
@@ -161,6 +154,7 @@ class Subject extends Component {
                     icon={<DeleteOutlined />}
                     // size='large'
                     style={{ width: 40 }}
+                    onClick={this.handleDel(record)}
                   ></Button>
                 </Tooltip>
               </>
@@ -192,6 +186,7 @@ class Subject extends Component {
             showSizeChanger:true,
             pageSizeOptions:['5','10','15'],
             showQuickJumper:true,
+            defaultPageSize: 10, 
             onChange: this.handleChange,
             onShowSizeChange:this.handleShowSizeChange,
             current:this.page

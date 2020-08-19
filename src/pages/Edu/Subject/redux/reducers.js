@@ -1,4 +1,4 @@
-import {GET_SUBJECT_LIST,GET_SEC_SUBJECT_LIST,UPDATE_SUBJECT} from "./constants";
+import {GET_SUBJECT_LIST,GET_SEC_SUBJECT_LIST,UPDATE_SUBJECT,DELETE_SUBJECT} from "./constants";
 
 const initUserList = {
   total: 0, // 总数
@@ -41,6 +41,23 @@ export default function subjectList(prevState = initUserList, action) {
       return {
         ...prevState
       }
+    case DELETE_SUBJECT:
+      const FirstSubjects = [...prevState.items]
+      FirstSubjects.forEach((item,index) => {
+        if(item._id === action.data){
+          FirstSubjects.splice(index,1)
+          return
+        }
+        item.children.forEach((secItem,index) => {
+          if(secItem._id === action.data){
+            item.children.splice(index,1)
+          }
+        })
+      })
+    return{
+      ...prevState,
+      items:FirstSubjects
+    }
     default:
       return prevState;
   }

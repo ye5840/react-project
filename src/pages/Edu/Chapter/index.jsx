@@ -15,20 +15,17 @@ import relativeTime from "dayjs/plugin/relativeTime";
 
 import { connect } from "react-redux";
 import SearchForm from "./SearchForm";
+import {getLessonList} from './redux'
 
 import "./index.less";
 
 dayjs.extend(relativeTime);
 
 @connect(
-  (state) => ({
-    // courseList: state.courseList
-    // permissionValueList: filterPermissions(
-    //   state.course.permissionValueList,
-    //   "Course"
-    // )
-  })
-  // { getcourseList }
+  state => ({
+    chapterList: state.chapterList.chapterList
+  }),
+  {getLessonList}
 )
 class Chapter extends Component {
   state = {
@@ -89,7 +86,12 @@ class Chapter extends Component {
       selectedRowKeys,
     });
   };
-
+  
+  handleGetLesson = (expand,record) => {
+    if(expand){
+      this.props.getLessonList(record._id)
+    }
+  }
   render() {
     const { previewVisible, previewImage, selectedRowKeys } = this.state;
 
@@ -106,16 +108,26 @@ class Chapter extends Component {
         },
       },
       {
+        title: "视频",
+        // dataIndex: "free",
+        render: record => {
+          if(record.free){
+            return <Button>预览</Button>
+          }else{
+            return null
+          }
+        }
+      },
+      {
         title: "操作",
-        width: 300,
+        width: 210,
         fixed: "right",
-        render: (data) => {
-          if ("free" in data) {
+        render: data => { 
             return (
               <div>
-                <Tooltip title="查看详情">
-                  <Button>
-                    <SettingOutlined />
+                <Tooltip title="新增课时">
+                  <Button type="primary">
+                    <PlusOutlined />
                   </Button>
                 </Tooltip>
                 <Tooltip title="更新章节">
@@ -130,7 +142,7 @@ class Chapter extends Component {
                 </Tooltip>
               </div>
             );
-          }
+          
         },
       },
     ];
@@ -290,8 +302,11 @@ class Chapter extends Component {
           <Table
             rowSelection={rowSelection}
             columns={columns}
-            dataSource={data}
-            rowKey="id"
+            dataSource={this.props.chapterList}
+            rowKey="_id"
+            expandable = {{
+              onExpand:this.handleGetLesson
+            }}
           />
         </div>
 

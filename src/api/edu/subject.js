@@ -31,7 +31,7 @@ export function reqAddSubject(title,parentId){
   })
 }
 
-// 新增课程分类 /admin/edu/course/save
+// 更新课程分类 /admin/edu/subject/update
 export function reqUpdateSubject(id,title){
   return request({
     url:`${BASE_URL}/update`,
@@ -40,5 +40,13 @@ export function reqUpdateSubject(id,title){
       id,
       title
     }
+  })
+}
+
+// 删除课程分类 /admin/edu/subject/remove/:id
+export function reqDelSubject(id){
+  return request({
+    url:`${BASE_URL}/remove/${id}`,
+    method:"DELETE"
   })
 }
