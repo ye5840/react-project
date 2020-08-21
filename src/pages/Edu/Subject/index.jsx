@@ -48,9 +48,9 @@ class Subject extends Component {
       title:e.target.value
     })
   }
-  handleCancle = (_id,title) => {
+  handleCancle = () => {
     this.setState({
-      subjectid:_id,
+      subjectid:'',
       title:''
     })
   }

@@ -92,6 +92,9 @@ class Chapter extends Component {
       this.props.getLessonList(record._id)
     }
   }
+  handleGoAddLesson = data => () => {
+    this.props.history.push('/edu/chapter/addlesson',data)
+  }
   render() {
     const { previewVisible, previewImage, selectedRowKeys } = this.state;
 
@@ -126,7 +129,7 @@ class Chapter extends Component {
             return (
               <div>
                 <Tooltip title="新增课时">
-                  <Button type="primary">
+                  <Button type="primary" onClick={this.handleGoAddLesson(data)}>
                     <PlusOutlined />
                   </Button>
                 </Tooltip>
