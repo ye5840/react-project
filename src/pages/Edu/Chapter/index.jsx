@@ -10,14 +10,16 @@ import {
   DeleteOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
+import Player from 'griffith'
 
 import relativeTime from "dayjs/plugin/relativeTime";
 
 import { connect } from "react-redux";
 import SearchForm from "./SearchForm";
-import {getLessonList} from './redux'
+import {getLessonList, delChapterList, delLessonList} from './redux'
 
 import "./index.less";
+import screenfull from 'screenfull'
 
 dayjs.extend(relativeTime);
 
@@ -25,7 +27,7 @@ dayjs.extend(relativeTime);
   state => ({
     chapterList: state.chapterList.chapterList
   }),
-  {getLessonList}
+  {getLessonList, delChapterList, delLessonList}
 )
 class Chapter extends Component {
   state = {
@@ -33,6 +35,7 @@ class Chapter extends Component {
     previewVisible: false,
     previewImage: "",
     selectedRowKeys: [],
+    play_url: ''
   };
 
   showImgModal = (img) => {
@@ -81,7 +84,7 @@ class Chapter extends Component {
       });
   };
 
-  onSelectChange = (selectedRowKeys) => {
+  onSelectChange = selectedRowKeys => {
     this.setState({
       selectedRowKeys,
     });
@@ -94,6 +97,30 @@ class Chapter extends Component {
   }
   handleGoAddLesson = data => () => {
     this.props.history.push('/edu/chapter/addlesson',data)
+  }
+  handlePreviewVideo = record => () => {
+    this.setState({
+      previewVisible:true,
+      play_url:record.video
+    })
+  }
+  handleBatchRemove = async () => {
+    const chapterIdList = []
+    this.props.chapterList.forEach(item => {
+      if (this.state.selectedRowKeys.indexOf(item._id) > -1) {
+        chapterIdList.push(item._id)
+      }
+    })
+
+    const lessonIdList = this.state.selectedRowKeys.filter(item => {
+      if (chapterIdList.indexOf(item) > -1) {
+        return false
+      }
+      return true
+    })
+    await this.props.delChapterList(chapterIdList)
+    await this.props.delLessonList(lessonIdList)
+    message.success('批量删除成功')
   }
   render() {
     const { previewVisible, previewImage, selectedRowKeys } = this.state;
@@ -115,7 +142,7 @@ class Chapter extends Component {
         // dataIndex: "free",
         render: record => {
           if(record.free){
-            return <Button>预览</Button>
+            return <Button onClick={this.handlePreviewVideo(record)}>预览</Button>
           }else{
             return null
           }
@@ -228,41 +255,19 @@ class Chapter extends Component {
     const rowSelection = {
       selectedRowKeys,
       onChange: this.onSelectChange,
-      // hideDefaultSelections: true,
-      // selections: [
-      //   Table.SELECTION_ALL,
-      //   Table.SELECTION_INVERT,
-      //   {
-      //     key: "odd",
-      //     text: "Select Odd Row",
-      //     onSelect: changableRowKeys => {
-      //       let newSelectedRowKeys = [];
-      //       newSelectedRowKeys = changableRowKeys.filter((key, index) => {
-      //         if (index % 2 !== 0) {
-      //           return false;
-      //         }
-      //         return true;
-      //       });
-      //       this.setState({ selectedRowKeys: newSelectedRowKeys });
-      //     }
-      //   },
-      //   {
-      //     key: "even",
-      //     text: "Select Even Row",
-      //     onSelect: changableRowKeys => {
-      //       let newSelectedRowKeys = [];
-      //       newSelectedRowKeys = changableRowKeys.filter((key, index) => {
-      //         if (index % 2 !== 0) {
-      //           return true;
-      //         }
-      //         return false;
-      //       });
-      //       this.setState({ selectedRowKeys: newSelectedRowKeys });
-      //     }
-      //   }
-      // ]
     };
 
+    const sources = {
+      hd: {
+       	play_url:this.state.play_url,
+        bitrate: 1,
+        duration: 1000,
+        format: '',
+        height: 500,
+        size: 160000,
+        width: 500
+      }
+    }
     return (
       <div>
         <div className="course-search">
@@ -276,11 +281,13 @@ class Chapter extends Component {
                 <PlusOutlined />
                 <span>新增</span>
               </Button>
-              <Button type="danger" style={{ marginRight: 10 }}>
+              <Button type="danger" style={{ marginRight: 10 }} onClick={this.handleBatchRemove}>
                 <span>批量删除</span>
               </Button>
               <Tooltip title="全屏" className="course-table-btn">
-                <FullscreenOutlined />
+                <FullscreenOutlined onClick={() => {
+                  screenfull.request()
+                }}/>
               </Tooltip>
               <Tooltip title="刷新" className="course-table-btn">
                 <RedoOutlined />
@@ -316,10 +323,19 @@ class Chapter extends Component {
         <Modal
           visible={previewVisible}
           footer={null}
+          title='预览课时'
           onCancel={this.handleImgModal}
+          destroyOnClose={true}
         >
-          <img alt="example" style={{ width: "100%" }} src={previewImage} />
-        </Modal>
+         <Player 
+          sources={sources}
+          id={'1'}
+          cover={'http://localhost:3000/logo512.png'}
+          duration={1000}
+        >
+
+          </Player>
+        </Modal> 
       </div>
     );
   }

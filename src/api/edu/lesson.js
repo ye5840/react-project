@@ -25,3 +25,13 @@ export function addLesson({chapterId,title,free,video}){
     }
   })
 }
+
+export function reqBatchRemoveLessonList(lessonIdList){
+  return request({
+    url:`${BASE_URL}/batchRemove`,
+    method:"DELETE",
+    data: {
+      idList: lessonIdList
+    }
+  })
+}

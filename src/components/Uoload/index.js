@@ -7,6 +7,9 @@ import {reqGetUploadToken} from '@api/edu/lesson'
 export default class MyUpload extends Component {
   constructor(){
     super()
+    this.state={
+      isShowUpload:true
+    }
     const jsonStr = localStorage.getItem('uploadToken')
 
     if(jsonStr){
@@ -51,7 +54,10 @@ export default class MyUpload extends Component {
         // ...
         // console.log('上传成功',res)
         onSuccess(res)
-        this.props.onChange('http://qfevjkiwt.hn-bkt.clouddn.com' + res.key)
+        this.setState({
+          isShowUpload:false
+        })
+        this.props.onChange("http://qfevjkiwt.hn-bkt.clouddn.com/"+ res.key)
       }
     }
     // const file = options.file
@@ -71,18 +77,26 @@ export default class MyUpload extends Component {
   }
   handleRemove = () => {
     this.props.onChange('')
+    this.setState({
+      isShowUpload:true
+    })
   }
   render() {
     return (
+        (
         <Upload
           beforeUpload={this.handleBeforeUpload}
           customRequest={this.handleCustomRequest}
           onRemove={this.handleRemove}
+          accept="video/*"
         >
+          {this.state.isShowUpload && (
           <Button>
             <UploadOutlined /> 上传视频
           </Button>
+          )}
         </Upload>
+        )
     )
   }
 }
