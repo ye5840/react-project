@@ -15,24 +15,29 @@ import SiderMenu from "../SiderMenu";
 import { AuthorizedRouter } from "@comps/Authorized";
 import { logout } from "@redux/actions/login";
 import { resetUser } from "../../components/Authorized/redux";
+import {setIntl} from '@redux/actions/intl'
 import logo from "@assets/images/logo.png";
 import { findPathIndex } from "@utils/tools";
 
 // 引入组件公共样式
 import "@assets/css/common.less";
 import "./index.less";
+import { options } from "less";
 
 const { Header, Sider, Content } = Layout;
 
 @connect(
   (state) => ({
     user: state.user,
+    intl: state.intl
   }),
   {
     logout,
     resetUser,
+    setIntl
   }
 )
+
 @withRouter
 class PrimaryLayout extends Component {
   state = {
@@ -131,6 +136,10 @@ class PrimaryLayout extends Component {
     );
   };
 
+  handleMenuClick = options => {
+    const key = options.key
+    this.props.setIntl(key)
+  }
   render() {
     const { collapsed } = this.state;
     const {
@@ -140,6 +149,12 @@ class PrimaryLayout extends Component {
     } = this.props;
 
     const route = this.selectRoute(routes, pathname);
+
+    const menu = (
+    <Menu selectedKeys={[this.props.intl]} onClick={this.handleMenuClick}>
+      <Menu.Item key="en">English</Menu.Item>
+      <Menu.Item key="zh">中文</Menu.Item>
+    </Menu>)
 
     return (
       <Layout className="layout">
@@ -169,9 +184,11 @@ class PrimaryLayout extends Component {
                     <span>{user.name}</span>
                   </span>
                 </Dropdown>
-                <span className="site-layout-lang">
-                  <GlobalOutlined />
-                </span>
+                <Dropdown overlay={menu}>
+                  <span className="site-layout-lang">
+                    <GlobalOutlined />
+                  </span>
+                </Dropdown>
               </span>
             </span>
           </Header>
