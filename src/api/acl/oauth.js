@@ -10,3 +10,14 @@ export function reqGetVerifyCode(mobile){
     }
   })
 }
+
+export function mobileLogin(mobile,code){
+  return request({
+    url:`${BASE_URL}/mobile`,
+    method:'POST',
+    data:{
+      mobile,
+      code
+    }
+  })
+}
