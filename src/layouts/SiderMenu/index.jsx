@@ -1,67 +1,86 @@
-import React, { Component } from "react";
-import { Menu } from "antd";
-import { withRouter } from "react-router-dom";
+import React, { Component } from 'react';
+import { Layout, Menu, Breadcrumb } from 'antd'
+import {
+  DesktopOutlined,
+  PieChartOutlined,
+  FileOutlined,
+  TeamOutlined,
+  UserOutlined,
+  GlobalOutlined,
+  MenuUnfoldOutlined,
+  MenuFoldOutlined
+} from '@ant-design/icons'
 
-import createMenus from "./menus";
-import { defaultRoutes } from "@conf/routes";
-import { findPathIndex } from "@utils/tools";
+import {Link,withRouter} from 'react-router-dom'
+import icons from '@conf/icons'
+import { connect } from 'react-redux';
+import { defaultRoutes } from '@conf/routes'
+const { SubMenu } = Menu
 
 @withRouter
-class SiderMenu extends Component {
-  state = {
-    openKeys: [],
-    prevOpenKeys: [],
-  };
+@connect(state => ({ permissionList: state.user.permissionList }))
+class SideMenu extends Component {
+  //根据数据渲染menu
+  //数据:routes.js里面的defaultRoutes redux->permissionList
+  renderMenu = routes => {
 
-  static getDerivedStateFromProps(props, state) {
-    const nextPropOpenKey = props.defaultOpenKey;
-    const prevPropOpenKey = state.prevOpenKeys;
-
-    if (prevPropOpenKey[0] !== nextPropOpenKey) {
-      return {
-        openKeys: [nextPropOpenKey],
-        prevOpenKeys: [nextPropOpenKey],
-      };
-    }
-
-    return {
-      openKeys: state.openKeys,
-    };
+    return routes.map(route => {
+      //hidden true不渲染 false才渲染
+      if(route.hidden) return
+      const Icon = icons[route.icon]
+      if(route.children && route.children.length){
+        return (
+          <SubMenu key={route.path} icon={<Icon />} title={route.name}>
+            {route.children.map(SecItem => {
+              if (SecItem.hidden) return null
+              return (
+                <Menu.Item key={route.path + SecItem.path}>
+                  <Link to={route.path + SecItem.path}>
+                    {SecItem.name}
+                  </Link>
+                </Menu.Item>
+              )
+            })}
+          </SubMenu>
+        )
+      }else{
+        return(
+          <Menu.Item key={route.path} icon={<Icon />}>
+               { route.path === '/' ? <Link to='/'>{route.name}</Link> :route.name}
+          </Menu.Item>
+        )
+      }
+    })
   }
-
-  openChange = (openKeys) => {
-    this.setState({
-      openKeys,
-    });
-  };
-
   render() {
-    const { routes, location } = this.props;
-
-    let { pathname } = location;
-    const index = findPathIndex(pathname, "/");
-    if (index) {
-      pathname = pathname.slice(0, index) + "/list";
-    }
-
-    const { openKeys } = this.state;
-
-    const initMenus = createMenus(defaultRoutes);
-    const asyncMenus = createMenus(routes);
-
+    const pathname = this.props.location.pathname
+    const matchArr =  pathname.match(/[/][a-z]+/)
+    const openKey = matchArr && matchArr[0]
     return (
-      <Menu
-        theme="dark"
-        mode="inline"
-        selectedKeys={[pathname]}
-        openKeys={openKeys}
-        onOpenChange={this.openChange}
-        onSelect={this.select}
-      >
-        {initMenus}
-        {asyncMenus}
-      </Menu>
+      <div>
+        <Menu theme='dark' defaultSelectedKeys={[pathname]} defaultOpenKeys={[openKey]} mode='inline'>
+          {this.renderMenu(defaultRoutes)}
+          {this.renderMenu(this.props.permissionList)}
+            {/* <Menu.Item key='1' icon={<PieChartOutlined />}>
+              Option 1
+            </Menu.Item>
+            <Menu.Item key='2' icon={<DesktopOutlined />}>
+              Option 2
+            </Menu.Item>
+            <SubMenu key='sub1' icon={<UserOutlined />} title='User'>
+              <Menu.Item key='3'>Tom</Menu.Item>
+              <Menu.Item key='4'>Bill</Menu.Item>
+              <Menu.Item key='5'>Alex</Menu.Item>
+            </SubMenu>
+            <SubMenu key='sub2' icon={<TeamOutlined />} title='Team'>
+              <Menu.Item key='6'>Team 1</Menu.Item>
+              <Menu.Item key='8'>Team 2</Menu.Item>
+            </SubMenu>
+            <Menu.Item key='9' icon={<FileOutlined />} /> */}
+          </Menu>
+      </div>
     );
   }
 }
-export default SiderMenu;
+
+export default SideMenu;

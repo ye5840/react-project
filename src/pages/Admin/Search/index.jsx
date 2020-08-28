@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import {Tabs} from 'antd'
+
 import { 
 RingProgressChart,
 G2,
@@ -188,7 +189,7 @@ export default class index extends Component {
                         </tr>
                       </thead>
                         <tbody
-                          class="g2-tooltip-list"
+                          className="g2-tooltip-list"
                         >
                       </tbody>
                       </table>);

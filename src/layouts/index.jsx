@@ -6,7 +6,7 @@ import PrimaryLayout from "./PrimaryLayout";
 import PublicLayout from "./PublicLayout";
 import { Authorized } from "../components/Authorized";
 
-@connect((state) => ({ token: state.token }))
+@connect(state => ({ token: state.token }))
 class BasicLayout extends Component {
   render() {
     const { token } = this.props;
@@ -16,7 +16,7 @@ class BasicLayout extends Component {
       // 提供一个B组件渲染到A组件内部，并传入props
       return (
         <Authorized
-          render={(user) => {
+          render={user => {
             return <PrimaryLayout user={user} />;
           }}
         />

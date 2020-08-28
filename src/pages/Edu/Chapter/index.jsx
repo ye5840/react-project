@@ -25,7 +25,8 @@ dayjs.extend(relativeTime);
 
 @connect(
   state => ({
-    chapterList: state.chapterList.chapterList
+    chapterList: state.chapterList.chapterList,
+    permissionValueList:state.user.permissionValueList
   }),
   {getLessonList, delChapterList, delLessonList}
 )
@@ -124,6 +125,8 @@ class Chapter extends Component {
   }
   render() {
     const { previewVisible, previewImage, selectedRowKeys } = this.state;
+    const permissionValueList = this.props.permissionValueList
+    const index =  permissionValueList.indexOf('chapter.addlesson')
 
     const columns = [
       {
@@ -155,11 +158,13 @@ class Chapter extends Component {
         render: data => { 
             return (
               <div>
+                {index > -1 && (
                 <Tooltip title="新增课时">
                   <Button type="primary" onClick={this.handleGoAddLesson(data)}>
                     <PlusOutlined />
                   </Button>
                 </Tooltip>
+                )}
                 <Tooltip title="更新章节">
                   <Button type="primary" style={{ margin: "0 10px" }}>
                     <FormOutlined />
